@@ -11,10 +11,14 @@ model = YOLO("yolov8n.pt")  # Load YOLOv8 model
 drawing = False  # Flag for polygon drawing
 polygon_points = []  # List to store polygon points
 
-# Mouse callback function to draw polygon
+# Mouse callback function to draw polygon and print coordinates
 def draw_polygon(event, x, y, flags, param):
     global drawing, polygon_points, frame
     if event == cv2.EVENT_LBUTTONDOWN:
+        # Print coordinates
+        print(f"Clicked at coordinates: ({x}, {y})")
+
+        # Draw polygon
         if len(polygon_points) < 4:
             polygon_points.append((x, y))
         if len(polygon_points) == 4:
@@ -52,21 +56,25 @@ def initialize_input_source(input_source, image_path):
 # Draw polygon on the frame and wait for user input
 def draw_polygon_interactively(frame):
     cv2.imshow("Camera", frame)
-    cv2.setMouseCallback("Camera", draw_polygon)
-    print("Draw a polygon with exactly 4 points and press 'ENTER' to proceed.")
+    cv2.setMouseCallback("Camera", draw_polygon)  # Set callback for drawing polygon and printing coordinates
+    print("Click on the image to see coordinates. Draw a polygon with exactly 4 points and press 'ENTER' to proceed.")
+    
+    message_printed = False  # Flag to track if the message has been printed
     while True:
         key = cv2.waitKey(1) & 0xFF
         if key == 13 and len(polygon_points) == 4:  # ENTER key
             break
-        elif len(polygon_points) >= 4:
+        elif len(polygon_points) >= 4 and not message_printed:  # Print message only once
             print("Polygon drawn with 4 points. Press 'ENTER' to proceed.")
+            message_printed = True  # Set the flag to True after printing
         elif key == ord('q'):
             print("Exiting.")
             exit()
 
 # Process the frame with YOLO and perspective transform
 def process_frame(frame, model, polygon_points, width, height, matrix):
-    results = model(frame)
+    # Run YOLO model with verbose=False to suppress output
+    results = model(frame, verbose=False)
     annotated_frame = results[0].plot()
     cv2.polylines(annotated_frame, [np.array(polygon_points, np.int32)], isClosed=True, color=(0, 255, 0), thickness=2)
     transformed_frame = cv2.warpPerspective(frame, matrix, (width, height))
