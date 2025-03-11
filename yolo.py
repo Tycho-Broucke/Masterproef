@@ -16,6 +16,9 @@ cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 1280)
 # Load YOLOv8 model
 model = YOLO("yolov8n.pt")
 
+#define custom classes
+#model.set_classes(["dice"])
+
 while True:
     # Capture a frame from the external camera
     ret, frame = cap.read()

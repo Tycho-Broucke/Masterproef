@@ -59,13 +59,24 @@ cv2.imshow("Camera", frame)
 cv2.setMouseCallback("Camera", draw_polygon)
 
 # Wait until user finishes drawing the 4-point polygon (press "ENTER")
+
+# Flag to check if the message has already been printed
+message_printed = False
 print("Draw a polygon with exactly 4 points and press 'ENTER' to proceed.")
 while True:
     key = cv2.waitKey(1) & 0xFF
-    if key == 13 and len(polygon_points) == 4:  # ENTER key, only proceed if 4 points are drawn
+    
+    # Check if 4 points are drawn
+    if len(polygon_points) == 4:
+        # Only print the message once
+        if not message_printed:
+            print("Polygon drawn with 4 points. Press 'ENTER' to proceed.")
+            message_printed = True
+
+    # Break if ENTER key is pressed and 4 points are drawn
+    if key == 13 and len(polygon_points) == 4:
         break
-    elif len(polygon_points) >= 4:
-        print("Polygon drawn with 4 points. Press 'ENTER' to proceed.")
+    # Exit if 'q' key is pressed
     elif key == ord('q'):
         print("Exiting.")
         break
@@ -98,7 +109,11 @@ while True:
     cv2.polylines(annotated_frame, [np.array(polygon_points, np.int32)], isClosed=True, color=(0, 255, 0), thickness=2)
 
     # Perform the perspective transform to map the points to the new screen
-    transformed_frame = cv2.warpPerspective(frame, matrix, (width, height))
+    try:
+        transformed_frame = cv2.warpPerspective(frame, matrix, (width, height))
+    except cv2.error as e:
+        print(f"Error in perspective transform: {e}")
+        continue  # Skip this frame and move to the next one
 
     # Show the transformed frame as the new screen
     cv2.imshow("Transformed View", transformed_frame)
