@@ -109,11 +109,7 @@ while True:
     cv2.polylines(annotated_frame, [np.array(polygon_points, np.int32)], isClosed=True, color=(0, 255, 0), thickness=2)
 
     # Perform the perspective transform to map the points to the new screen
-    try:
-        transformed_frame = cv2.warpPerspective(frame, matrix, (width, height))
-    except cv2.error as e:
-        print(f"Error in perspective transform: {e}")
-        continue  # Skip this frame and move to the next one
+    transformed_frame = cv2.warpPerspective(frame, matrix, (width, height))
 
     # Show the transformed frame as the new screen
     cv2.imshow("Transformed View", transformed_frame)
